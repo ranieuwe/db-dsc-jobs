@@ -1,0 +1,8 @@
+{
+    "authority": "https://login.microsoftonline.com/<your-tenant>",
+    "client_id": "<your-sp-tenant-id>",
+    "scope": ["2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/.default"],
+    "thumbprint": "<thumbprint of your cert>",
+    "private_key_file": "server.pem",
+    "databricks_uri": "https://<your-instance eg adb-....>.azuredatabricks.net/api/2.0/%s"
+}
