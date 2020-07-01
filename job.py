@@ -1,6 +1,5 @@
-import json, socket, requests, sys
-import auth
-
+import json, socket, argparse, sys, auth
+import requests
 from jinja2 import Environment, PackageLoader
 from datetime import datetime
 
@@ -8,7 +7,12 @@ from datetime import datetime
 current_time = datetime.now().strftime("%H:%M:%S")
 
 # Optional: lift to env files. 
-configuration = json.load(open(sys.argv[1]))
+
+parser = argparse.ArgumentParser(description='DSC job management for Databricks')
+parser.add_argument('--params', type=str, help='your Databricks and Azure parameter file', default='params.json')
+args = parser.parse_args()
+
+configuration = json.load(open(args.params))
 
 auth_token = auth.get_auth_token_from_cert(configuration)
 
@@ -21,14 +25,14 @@ head = {'Authorization': 'Bearer ' + auth_token["access_token"], 'Content-Type':
 
 # Get something from Databricks, parse to JSON if asked
 def get_db(action, returnJson=False):
-    url = databricks_uri % action
+    url = configuration['databricks_uri'] % action
     log("REST - GET - Calling %s" % action)
     response = requests.get(url, headers=head)
     return response.json() if json else response
 
 # Post something from Databricks, parse to JSON if asked
 def post_db(action, jsonpl, returnJson=False):
-    url = databricks_uri % action
+    url = configuration['databricks_uri'] % action
     log("REST - POST - Calling %s" % action)
     response = requests.post(url, headers=head, data=jsonpl)
     return response
@@ -50,7 +54,7 @@ def log(s):
 
 def main():
 
-    log("Running execution against %s" % databricks_uri.split('/')[2])
+    log("Running execution against %s" % configuration['databricks_uri'].split('/')[2])
 
     jobs = get_db("jobs/list", returnJson=True)
     jobnames = []
