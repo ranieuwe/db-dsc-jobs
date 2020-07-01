@@ -2,6 +2,7 @@
 *.pem
 *.csr
 *.crt
+params.json
 
 # IDE
 .vscode/
