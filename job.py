@@ -69,6 +69,7 @@ def main():
     job1 = {
         'name': 'Jinja job example',
         'workers': 1,
+        'notebookpath': '/Covid19',
         'par_sourcesystem': 'testSource','par_sourcesystem_val': 'testSource_val',
         'par_cdc_volume': 'testcdc-volume','par_cdc_volume_val': 'testcdc-volume_val',
         'par_numberofstreams': 'testnumberofstreams','par_numberofstreams_val': 'testnumberofstreams_val',

@@ -1,3 +1,5 @@
+
+
 {
     "name": "{{ job.name }}",
     "new_cluster": {
@@ -16,7 +18,7 @@
       }
     ],
     "notebook_task": {
-      "notebook_path": "/USACovid19",
+      "notebook_path": "{{ job.notebookpath}}",
       "base_parameters": {
         "{{ job.par_sourcesystem }}": "{{ job.par_sourcesystem_val }}",
         "{{ job.par_cdc_volume }}": "{{ job.par_cdc_volume_val }}",
