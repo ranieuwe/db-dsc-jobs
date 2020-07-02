@@ -68,9 +68,19 @@ def main():
     # Set up definition based on input from Molly
     job1 = {
         'name': 'Jinja job example',
-        'workers': 10,
+        'workers': 1,
+        'par_sourcesystem': 'testSource','par_sourcesystem_val': 'testSource_val',
+        'par_cdc_volume': 'testcdc-volume','par_cdc_volume_val': 'testcdc-volume_val',
+        'par_numberofstreams': 'testnumberofstreams','par_numberofstreams_val': 'testnumberofstreams_val',
+        'par_configfilepath': 'testconfigfilepath','par_configfilepath_val': 'testconfigfilepath_val',
         'description': 'Not used in template, for reference'
     }
+        
+    #job1 = {
+    #   'name': 'Jinja job example',
+    #    'workers': 10,
+    #    'description': 'Not used in template, for reference'
+    #}
 
     # Delete active jobs for the name in job1
     # TODO: The above definition need to come from a folder in DBFS, then loop over them and pull. 
