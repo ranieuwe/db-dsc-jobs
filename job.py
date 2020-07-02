@@ -14,7 +14,8 @@ args = parser.parse_args()
 
 configuration = json.load(open(args.params))
 
-auth_token = auth.get_auth_token_from_cert(configuration)
+auth_token = auth.get_auth_token(configuration)
+databricks_uri = configuration['databricks_uri'] + "/api/2.0/%s"
 
 # Settings for jinja2
 tplenv = Environment(loader=PackageLoader('job','templates'))
@@ -25,14 +26,14 @@ head = {'Authorization': 'Bearer ' + auth_token["access_token"], 'Content-Type':
 
 # Get something from Databricks, parse to JSON if asked
 def get_db(action, returnJson=False):
-    url = configuration['databricks_uri'] % action
+    url = databricks_uri % action
     log("REST - GET - Calling %s" % action)
     response = requests.get(url, headers=head)
     return response.json() if json else response
 
 # Post something from Databricks, parse to JSON if asked
 def post_db(action, jsonpl, returnJson=False):
-    url = configuration['databricks_uri'] % action
+    url = databricks_uri % action
     log("REST - POST - Calling %s" % action)
     response = requests.post(url, headers=head, data=jsonpl)
     return response
@@ -54,14 +55,14 @@ def log(s):
 
 def main():
 
-    log("Running execution against %s" % configuration['databricks_uri'].split('/')[2])
+    log("Running execution against %s" % configuration['databricks_uri'])
 
     jobs = get_db("jobs/list", returnJson=True)
     jobnames = []
 
     if(len(jobs) > 0): 
         log("Total of %s jobs found" % len(jobs['jobs']))
-        jobnames = [(j['settings']['name'],j['job_id']) for j in jobs['jobs']]
+        jobnames = [(j['settings']['name'],j['job_id']) for j in jobs['jobs'] if j['creator_user_name'] == configuration["client_id"]]
     else:
         log("No jobs")
 
