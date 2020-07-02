@@ -62,7 +62,7 @@ def main():
 
     if(len(jobs) > 0): 
         log("Total of %s jobs found" % len(jobs['jobs']))
-        jobnames = [(j['settings']['name'],j['job_id']) for j in jobs['jobs']]
+        jobnames = [(j['settings']['name'],j['job_id']) for j in jobs['jobs'] if j['creator_user_name'] == configuration["client_id"]]
     else:
         log("No jobs")
 
