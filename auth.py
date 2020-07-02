@@ -6,20 +6,22 @@ import sys, json, requests, msal
 def get_auth_token(paramFile):
     
     result = None
+    auth = paramFile["authority_type"]
 
-    if paramFile["authority_type"] == "msi":
+    if auth == "msi":
         result = json.loads(requests.get(paramFile["authority"] + "&resource=" + paramFile["resource"] + "&client_id=" + paramFile["client_id"], headers={"Metadata": "true"}).text)
-    else:
-        if paramFile["authority_type"] == "spn-cert":
-            app = msal.ConfidentialClientApplication(
-                paramFile["client_id"], authority=paramFile["authority"],
-                client_credential={"thumbprint": paramFile["thumbprint"], "private_key": open(paramFile['private_key_file']).read()}
-            )            
-        if paramFile["authority_type"] == "spn-key":
-            app = msal.ConfidentialClientApplication(
-                paramFile["client_id"], authority=paramFile["authority"],
-                client_credential=paramFile["client_secret"]
-            )
-        result = app.acquire_token_for_client(scopes=[paramFile["resource"] + ".default"])
 
+    elif auth == "spn-cert" or auth == "spn-key":
+        app = msal.ConfidentialClientApplication(
+            paramFile["client_id"], authority=paramFile["authority"],
+            client_credential=  {"thumbprint": paramFile["thumbprint"], "private_key": open(paramFile['private_key_file']).read()} if auth == "spn-cert" else paramFile["client_secret"]
+        )
+        result = app.acquire_token_for_client(scopes=[paramFile["resource"] + "/.default"])
+        
+    elif auth == "pat":
+        result = {'access_token': paramFile["pat_token"]}
+
+    else:
+        # TODO: Raise exception
+        result = ""
     return result
