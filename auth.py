@@ -3,12 +3,12 @@ import sys, json, requests, msal
 # Cert based authentication using a service principal against MSFT AAD common endpoint (v2)
 # This is using MSAL over ADAL and uses a private key with a thumbprint loaded onto the service principal for authentication
 # TODO: provide instructions in README on how to get the .pem
-def get_auth_token_from_cert(paramFile):
+def get_auth_token(paramFile):
     
     result = None
 
     if paramFile["authority_type"] == "msi":
-        result = requests.get(paramFile["authority"] + "&resource=" + paramFile["resource"] + "&client_id=" + paramFile["client_id"], headers={"Metadata": "true"})
+        result = json.loads(requests.get(paramFile["authority"] + "&resource=" + paramFile["resource"] + "&client_id=" + paramFile["client_id"], headers={"Metadata": "true"}).text)
     else:
         if paramFile["authority_type"] == "spn-cert":
             app = msal.ConfidentialClientApplication(

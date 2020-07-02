@@ -14,7 +14,7 @@ args = parser.parse_args()
 
 configuration = json.load(open(args.params))
 
-auth_token = auth.get_auth_token_from_cert(configuration)
+auth_token = auth.get_auth_token(configuration)
 databricks_uri = configuration['databricks_uri'] + "/api/2.0/%s"
 
 # Settings for jinja2
