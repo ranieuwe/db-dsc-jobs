@@ -1,8 +1,8 @@
 import json, socket, argparse, sys, auth
 import requests
+import os
 from jinja2 import Environment, PackageLoader
 from datetime import datetime
-
 
 current_time = datetime.now().strftime("%H:%M:%S")
 
@@ -57,43 +57,33 @@ def main():
 
     log("Running execution against %s" % configuration['databricks_uri'])
 
-    jobs = get_db("jobs/list", returnJson=True)
-    jobnames = []
+    current_jobs = get_db("jobs/list", returnJson=True)
+    current_jobnames = []
 
-    if(len(jobs) > 0): 
-        log("Total of %s jobs found" % len(jobs['jobs']))
-        jobnames = [(j['settings']['name'],j['job_id']) for j in jobs['jobs'] if j['creator_user_name'] == configuration["client_id"]]
+    if(len(current_jobs) > 0): 
+        log("Total of %s jobs found" % len(current_jobs['jobs']))
+        current_jobnames = [(j['settings']['name'],j['job_id']) for j in current_jobs['jobs'] if j['creator_user_name'] == configuration["client_id"]]
     else:
         log("No jobs")
 
     # Set up definition based on input from Molly
-    job1 = {
-        'name': 'Jinja job example',
-        'workers': 1,
-        'notebookpath': '/Covid19',
-        'par_sourcesystem': 'testSource','par_sourcesystem_val': 'testSource_val',
-        'par_cdc_volume': 'testcdc-volume','par_cdc_volume_val': 'testcdc-volume_val',
-        'par_numberofstreams': 'testnumberofstreams','par_numberofstreams_val': 'testnumberofstreams_val',
-        'par_configfilepath': 'testconfigfilepath','par_configfilepath_val': 'testconfigfilepath_val',
-        'description': 'Not used in template, for reference'
-    }
-        
-    #job1 = {
-    #   'name': 'Jinja job example',
-    #    'workers': 10,
-    #    'description': 'Not used in template, for reference'
-    #}
+    target_jobs = [json.load(open(jobcfg)) for jobcfg in os.scandir('jobs') if(jobcfg.is_file() and jobcfg.path.endswith('.json'))]
+    target_jobnames = [j['name'] for j in target_jobs]
+
+    # All jobs that need to be deleted
+    jobs_to_delete = filter(lambda x: x[0] in target_jobnames, current_jobnames)
 
     # Delete active jobs for the name in job1
     # TODO: The above definition need to come from a folder in DBFS, then loop over them and pull. 
-    [delete_job(item[1]) for item in jobnames if item[0] == job1['name']]
+    [delete_job(item[1]) for item in jobs_to_delete]
     
     # Create a new job with the name above
     template = tplenv.get_template('standard.jinja2')
-    task = template.render(job=job1)
     
-    result = post_db("jobs/create", task).json()
-    log("Created a new job %s" % result['job_id'])
+    for x in target_jobs:
+        task = template.render(job=x)
+        result = post_db("jobs/create", task).json()
+        log("Created a new job %s" % result['job_id'])
 
 # Module hook
 if __name__ == '__main__':
