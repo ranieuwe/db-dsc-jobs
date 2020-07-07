@@ -73,6 +73,55 @@ curl -n -X GET -H 'Content-Type: application/json' \
 https://adb-0000000000000000.0.azuredatabricks.net/api/2.0/preview/scim/v2/ServicePrincipals
 ```
 
+## Job Template Values
+
+The JSON job templates provided in the `\jobs\` folder contains base values required for job execution along with parameter values which can be passed to the job. The parameters are defined using key:value pairs and correlate with the Jinja2 template.
+
+### Job definition file
+
+```
+  {
+    "name": "Jinja job example",
+    "workers": 1,
+    "notebookpath": "/Covid19",
+
+    "par_sourcesystem": "testSource",
+    "par_sourcesystem_val": "testSource_val",
+
+    "par_cdc_volume": "testcdc-volume",
+    "par_cdc_volume_val": "testcdc-volume_val",
+
+    "par_numberofstreams": "testnumberofstreams",
+    "par_numberofstreams_val": "testnumberofstreams_val",
+
+    "par_configfilepath": "testconfigfilepath",
+    "par_configfilepath_val": "testconfigfilepath_val",
+
+    "description": "Not used in template, for reference"
+  }
+```
+
+### Jinja2 template snippet
+
+```
+  ...
+    "notebook_task": {
+      "notebook_path": "{{ job.notebookpath}}",
+      "base_parameters": {
+        "{{ job.par_sourcesystem }}": "{{ job.par_sourcesystem_val }}",
+        "{{ job.par_cdc_volume }}": "{{ job.par_cdc_volume_val }}",
+        "{{ job.par_numberofstreams }}": "{{ job.par_numberofstreams_val }}",
+        "{{ job.par_configfilepath }}": "{{ job.par_configfilepath_val }}"
+      }
+  ...
+```
+### Databricks job definition
+
+After the job has been created, the parameters mapped can be seen in the job definition within Databricks.
+
+![](img/JinjaJobExample.png)
+
+
 ## Authentication Parameter File
 
 The parameter file will have the following values present, depending on which authentication method is used.
